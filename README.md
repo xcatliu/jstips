@@ -3,7 +3,7 @@
 # Introducing Javascript Tips
 > New year, new project. **A JS tip per day!**
 
-With great excitement, I introduce these short and useful daily Javascript tips that will allow you to improve your code writing. With less than 2 minutes each day, you will be able to read about performance, frameworks, conventions, hacks, interview questions and all the items that the future of this awesome language holds for us.
+With great excitement, I introduce these short and useful daily Javascript tips that will allow you to improve your code writing. With less than 2 minutes each day, you will be able to read about performance, conventions, hacks, interview questions and all the items that the future of this awesome language holds for us.
 
 At midday, no matter if it is a weekend or a holiday, a tip will be posted and tweeted.
 
@@ -18,7 +18,152 @@ To get updates, watch the repo and follow the [Twitter account](https://twitter.
 
 # Tips list
 
-## #12 - Pseudomentatory parameters in ES6 functions
+## #15 - Tip to angularjs ```$scope.on()``` and ```$rootScope.on()```
+
+> 2016-01-15 by [@xiaoyu5256](https://github.com/xiaoyu5256)
+
+If we use ```$state.reload()``` by angular-ui's UI-Router,we will find that,```$rootScope.on()``` will trigger many times;That's because when we call ```$state.reload()```,```$scope.on()``` will unbind,but ```$rootScope.on()``` will not. we can resolve it by two way.
+
+```javascript
+// one way: unbind when scope destroy
+
+var listener = $rootScope.on('event',function(){
+  console.log("trigger event");
+})
+$scope.on('$destroy',listener);
+
+// another way: check listener is exist
+//define listener outside
+var listener;
+!listener && listener = $rootScope.on('event',function(){
+  console.log("trigger event");
+});
+
+
+
+
+```
+
+## #14 - Fat Arrow Functions #ES6
+> 2016-01-13 by [@pklinger](https://github.com/pklinger/)
+
+Introduced as a new feature in ES6, fat arrow functions may come as a handy tool to write more code in less lines. The name comes from its syntax as `=>` is a 'fat arrow' compared to a thin arrow `->`. Some programmers might already know this type of functions from different languages such as Haskell as 'lambda expressions' respectively 'anonymous functions'. It is called anonymous, as these arrow functions do not have a descriptive function name.
+
+### What are the benefits?
+* Syntax: less LOC; no more typing `function` keyword over and over again
+* Semantics: capturing the keyword `this` from the surrounding context
+
+### Simple syntax example
+Have a look at these two code snippets, which exactly do the same job. You will quickly understand what fat arrow functions do.
+
+```javascript
+// general syntax for fat arrow functions
+param => expression
+
+// may also be written with parantheses
+// parentheses are required on multiple params
+(param1 [, param2]) => expression
+
+
+// using functions
+var arr = [5,3,2,9,1];
+var arrFunc = arr.map(function(x) {
+  return x * x;
+});
+console.log(arr)
+
+// using fat arrow
+var arr = [5,3,2,9,1];
+var arrFunc = arr.map((x) => x*x);
+console.log(arr)
+```
+
+As you may see, the fat arrow function in this case may save you time typing out the parentheses as well as the function and return keywords. I would advice you to always write parentheses around the parameter inputs as the parentheses will be needed for multiple input parameters such as in `(x,y) => x+y` anyways. It is just a way to cope with forgetting them in different use cases. But the code above would also work like this: `x => x*x`. So far these are only syntactical improvements, which lead to less LOC and better readability. 
+
+### Lexically binding `this`
+
+There is another good reason to use fat arrow functions. There is the issue with the context of `this`. With arrow functions, you will not worry about `.bind(this)` or setting `that = this` anymore, as fat arrow functions pick the context of `this` from the lexical sourrounding. Have a look at the next [example] (https://jsfiddle.net/pklinger/rw94oc11/):
+
+```javascript
+
+// globally defined this.i
+this.i = 100;
+
+var counterA = new CounterA();
+var counterB = new CounterB();
+var counterC = new CounterC();
+var counterD = new CounterD();
+
+// bad example 
+function CounterA() {
+  // CounterA's `this` instance (!! gets ignored here)
+  this.i = 0;
+  setInterval(function () {
+    // `this` refers to global object, not to CounterA's `this`
+    // therefore starts counting with 100, not with 0 (local this.i)
+    this.i++;
+    document.getElementById("counterA").innerHTML = this.i;
+  }, 500);
+}
+
+// manually binding that = this
+function CounterB() {
+  this.i = 0;
+  var that = this;
+  setInterval(function() {
+    that.i++;
+    document.getElementById("counterB").innerHTML = that.i;
+  }, 500);
+}
+
+// using .bind(this)
+function CounterC() {
+  this.i = 0;
+  setInterval(function() {
+    this.i++;
+    document.getElementById("counterC").innerHTML = this.i;
+  }.bind(this), 500);
+}
+
+// fat arrow function
+function CounterD() {
+  this.i = 0;
+  setInterval(() => {
+    this.i++;
+    document.getElementById("counterD").innerHTML = this.i;
+  }, 500);
+}
+```
+
+Further information about fat arrow functions may be found at [MDN] (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions). To see different syntax options visit [this site] (http://jsrocks.org/2014/10/arrow-functions-and-their-scope/).
+
+
+## #13 - Tip to measure performance of a javascript block
+
+2016-01-13 by [@manmadareddy](https://twitter.com/manmadareddy)
+
+For quickly measuring performance of a javascript block, we can use the console functions like
+[```console.time(label)```](https://developer.chrome.com/devtools/docs/console-api#consoletimelabel) and [```console.timeEnd(label)```](https://developer.chrome.com/devtools/docs/console-api#consoletimeendlabel)
+
+```javascript
+console.time("Array initialize");
+var arr = new Array(100),
+    len = arr.length,
+    i;
+
+for (i = 0; i < len; i++) {
+    arr[i] = new Object();
+};
+console.timeEnd("Array initialize"); // Outputs: Array initialize: 0.711ms
+```
+
+More info:
+[Console object](https://github.com/DeveloperToolsWG/console-object),
+[Javascript benchmarking](https://mathiasbynens.be/notes/javascript-benchmarking)
+
+Demo: [jsfiddle](https://jsfiddle.net/meottb62/) - [codepen](http://codepen.io/anon/pen/JGJPoa) (outputs in browser console)
+
+## #12 - Pseudomentatory parameters in ES6 functions #ES6
 
 > 2016-01-12 by [Avraam Mavridis](https://github.com/AvraamMavridis)
 
@@ -26,11 +171,11 @@ To get updates, watch the repo and follow the [Twitter account](https://twitter.
 In many programming languages the parameters of a function is by default mandatory and the developer has to explicitly define that a parameter is optional. In Javascript every parameter is optional, but we can enforce this behavior without messing the actual body of a function taking advantage of the [**es6's default values for parameters**] (http://exploringjs.com/es6/ch_parameter-handling.html#sec_parameter-default-values) feature.
 
 ```javascript
- const _err = function( message ){
-   throw new Error( message );
- }
+const _err = function( message ){
+  throw new Error( message );
+}
 
- const getSum = (a = _err('a is not defined'), b = _err('b is not defined')) => a + b
+const getSum = (a = _err('a is not defined'), b = _err('b is not defined')) => a + b
 
 getSum( 10 ) // throws Error, b is not defined
 getSum( undefined, 10 ) // throws Error, a is not defined
@@ -90,7 +235,6 @@ When you have to check if a property is present of an [object](https://developer
 var myObject = {
   name: '@tips_js'
 };
-if (typeof myObject['name'] !== 'undefined') { ... }
 
 if (myObject['name']) { ... }
 
@@ -130,6 +274,8 @@ user.hasOwnProperty('age'); // false, because age is from the prototype chain
 ```
 
 Check here the [live examples](https://jsbin.com/tecoqa/edit?js,console)!
+
+Also recommends read [this discussion](https://github.com/loverajoel/jstips/issues/62) about common mistakes at checking properties' existence in objects
 
 ## #09 - Template Strings
 
